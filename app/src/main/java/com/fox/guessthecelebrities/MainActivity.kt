@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.fox.guessthecelebrities.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
@@ -23,35 +24,23 @@ class MainActivity : AppCompatActivity() {
 
     private var reffs = mutableListOf<Any?>()
 
-    private val namesOfCeleb = mutableListOf<String?>()
-    private var namCel = listOf<String>()
-
+    private lateinit var viewModel: MainViewModel
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
+        viewModel.extractStringFromHtml()
 
-
-
-        lifecycleScope.launch(Dispatchers.IO) {
-            extractStringFromHtml()
-
+        viewModel.name.observe(this) {
+            myLog(it)
+            val adapter = ArrayAdapter(this, R.layout.simple_list_item_1, it)
+            binding.listView.adapter = adapter
+//            purchaseListAdapter.submitList(it)
         }
-
-        val adapter =  ArrayAdapter(this, R.layout.simple_list_item_1, namCel)
-
-        binding.btnShow.setOnClickListener {
-            lifecycleScope.launch(Dispatchers.Main) {
-                namCel = namesOfCeleb.map { it?.replaceAfterLast(" ", "") ?: "None" }
-                binding.listView.adapter = adapter
-            }
-        }
-
-
-
     }
 
 
@@ -76,51 +65,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    suspend fun extractStringFromHtml() {
-        val connection = URL(ELLEUK).openConnection() as HttpURLConnection
-        val data = connection.inputStream.bufferedReader().readText()
-//            myLog(data)
 
-        val start =
-            "<div class=\"simple-item-title item-title\">ELLE Edit: 20 Of The Best Eyeshadow Palettes</div>"
-        val finish =
-            "<p>Jolie is the second highest-paid actress in the world according to the magazine.</p>"
-
-        val pattern = Pattern.compile("$start(.*?)$finish")
-        val matcher = pattern.matcher(data.replace("\n",""))
-
-        var splitContent: String? = "X"
-        while (matcher.find()) {
-            splitContent = matcher.group(1)
-        }
-//        myLog(splitContent)
-
-        val namePattern = Pattern.compile("<span class=\"listicle-slide-hed-text\">" + "(.*?)" + "</span>")
-        val nameMatcher = namePattern.matcher(splitContent)
-
-        while (nameMatcher.find()) {
-            namesOfCeleb.add(nameMatcher.group(1))
-        }
-
-
-
-//        namesOfCeleb.forEach { it?.replaceAfterLast(" ", "")}
-
-
-
-
-
-
-
-//
-//        val headPattern = Pattern.compile("<h1>" + "(.*?)" + "</h1>")
-//        val headMatcher = headPattern.matcher(splitContent)
-//        val headers = mutableListOf<String?>()
-//        while (headMatcher.find()) {
-//            headers.add(headMatcher.group(1))
-//        }
-//        headers.forEach { myLog(it) }
-    }
 
     fun extractStringWithRegexFromHtml() {
         val connection = URL(ELLEUK).openConnection() as HttpURLConnection
@@ -150,7 +95,7 @@ class MainActivity : AppCompatActivity() {
 
 //        val p = Pattern.compile(start + "(.*?)" + finish)
         val p = Pattern.compile("$start(.*?)$finish")
-        val m = p.matcher(data.replace("\n",""))
+        val m = p.matcher(data.replace("\n", ""))
 
         var splitContent: String? = "X"
         while (m.find()) {
@@ -175,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         }
         headers.forEach { myLog(it) }
 
-    //        val pattern = Regex("$start(.*?)$finish")
+        //        val pattern = Regex("$start(.*?)$finish")
 //        val results = pattern.findAll(data)
 //            .map {
 //                it.groupValues[1]
@@ -184,6 +129,7 @@ class MainActivity : AppCompatActivity() {
 
 
     }
+
     override fun onDestroy() {
         super.onDestroy()
         _binding = null

@@ -19,7 +19,6 @@ class MainViewModel : ViewModel() {
     val name: LiveData<List<String?>>
         get() = _name
 
-
     fun extractStringFromHtml() {
         viewModelScope.launch(Dispatchers.IO) {
             val connection = URL(ELLEUK).openConnection() as HttpURLConnection
@@ -52,11 +51,6 @@ class MainViewModel : ViewModel() {
 
             _name.postValue(namCel)
 
-
-//        namesOfCeleb.forEach { it?.replaceAfterLast(" ", "")}
-
-
-//
 //        val headPattern = Pattern.compile("<h1>" + "(.*?)" + "</h1>")
 //        val headMatcher = headPattern.matcher(splitContent)
 //        val headers = mutableListOf<String?>()

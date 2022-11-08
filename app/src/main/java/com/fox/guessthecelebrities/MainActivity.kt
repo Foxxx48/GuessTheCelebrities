@@ -26,7 +26,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var viewModel: MainViewModel
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         _binding = ActivityMainBinding.inflate(layoutInflater)
@@ -39,10 +38,9 @@ class MainActivity : AppCompatActivity() {
             myLog(it)
             val adapter = ArrayAdapter(this, R.layout.simple_list_item_1, it)
             binding.listView.adapter = adapter
-//            purchaseListAdapter.submitList(it)
+
         }
     }
-
 
     fun extractWithJsoup() {
         val startTime = System.currentTimeMillis()
@@ -50,8 +48,6 @@ class MainActivity : AppCompatActivity() {
 //            myLog("$doc")
 
         doc.select("*")
-//            .map { el-> el.appendText("480") }
-//            .map { el-> el.appendText(".jpeg") }
 
             .map { col -> col.attr("href") }
             .parallelStream()
@@ -61,7 +57,6 @@ class MainActivity : AppCompatActivity() {
         reffs.forEach { myLog(it) }
 
         myLog("${(System.currentTimeMillis() - startTime) / 1000} seconds")
-
 
     }
 
